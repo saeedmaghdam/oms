@@ -1,0 +1,5 @@
+@startuml
+
+!$applicationName = "Order Management System"
+
+@enduml

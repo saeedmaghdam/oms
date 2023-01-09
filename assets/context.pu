@@ -1,15 +1,16 @@
 @startuml
 
-!include  https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include variables.pu
 
-title Order Managemenet System - Context Diagram
+title $applicationName - Context Diagram
 
 Person(trader, "Trader", "A customer of the Online Trading System.")
 
 System_Ext(kucoin, "KuCoin", "Sends orders & trades, order book to the OMS")
 System_Ext(ot, "Online Trading", "Allows customers to make trades and view reports about trades.")
 
-System(oms, "Order Management System", "Receives public data, processes this data. Gets orders from users, send order requests to the exchange.") 
+System(oms, $applicationName, "Receives public data, processes this data. Gets orders from users, send order requests to the exchange.") 
 
 BiRel(kucoin, oms, "Trading information")
 BiRel(oms, ot, "Trading information")

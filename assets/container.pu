@@ -1,0 +1,61 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include variables.pu
+
+AddElementTag("events", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
+
+
+title $applicationName - Container Diagram
+
+' Order management => 7 services? creating & managing orders
+' Market data =>
+' Private data
+' public data => received using market data
+' 2 systems:
+' order management system: only responsible for creating and managing of orders, trades, transactions. Private data
+' market data system: gets, receives public data from the external system, processes it to be used for the order management part. 
+
+System_Ext(kucoin, "KuCoin", "Sends orders & trades, order book to the OMS")
+
+Enterprise_Boundary(oms, $applicationName) {
+
+	System_Boundary(om, "Order Management") {
+		Container(om_api, "Api", "API")
+	}
+
+	System_Boundary(md, "Market Data") {
+		Container(data_provider, "Data Provider", "TECH")
+		Container(rabbitmq, "Message Bus", "RabbitMq", "", $tags="events")
+		Container(data_distributer, "Data Distributer", ".NET7 Web Api", "Does things")
+		Container(rabbitmq_1, "Message Bus 1", "RabbitMq", "", $tags="events")
+		Container(md_service, "Service", ".NET6 Worker", "Explain what the API does.")
+		Container(md_api, "Api", ".NET6 Web Api", "")
+		ContainerDb(db, "Database", "MSSQL Database")
+		ContainerDb(redis, "Key/Value database", "Redis")
+		Container(kafka, "Event Hub", "Kafka", "Events about (price, orderbook) updates)", $tags="events")
+		Rel(data_provider, rabbitmq, "Ordered information")
+		Rel(rabbitmq, data_distributer, "TODO")
+		Rel(data_distributer, rabbitmq_1, "Puts it in a separate queue")
+		Rel(rabbitmq_1, md_service, "")
+		Rel(md_service, kafka, "TODO (events)")
+		Rel(md_service, db, "TODO")
+		Rel(md_service, redis, "TODO")
+		Rel(db, md_api, "TODO")
+		Rel(redis, md_api, "TODO")
+	}
+
+	
+	Rel(kucoin, om_api, "Private data")
+	Rel(kucoin, data_provider, "Public data")
+	Rel(md_api, om_api, "Data")
+
+    System_Ext(ot, "Online Trading", "Allows customers to make trades and view reports about trades.")
+
+    Rel(kafka, ot, "Subscription")
+}
+
+Person(trader, "Trader", "A customer of the Online Trading System.")
+BiRel(trader, ot, "Make trades, views reports")
+
+@enduml
