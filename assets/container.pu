@@ -94,4 +94,6 @@ BiRel(trader, ot, "Make trades, views reports")
 Lay_U(oms, kucoin)
 Lay_D(ot, trader)
 
+SHOW_LEGEND()
+
 @enduml
