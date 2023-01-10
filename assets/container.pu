@@ -4,14 +4,17 @@
 !include variables.pu
 
 AddElementTag("events", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
+AddBoundaryTag("enterprise_boundary", $borderColor="68c5f8", $bgColor="eff8ff")
+AddBoundaryTag("system_boundary", $borderColor="9cbe25", $bgColor="fdfff3")
+AddBoundaryTag("sub_system_boundary", $borderColor="be2571", $bgColor="fff7fb")
 
 title $applicationName - Container Diagram
 
 System_Ext(kucoin, "KuCoin", "Sends orders & trades, order book to the OMS")
 
-Enterprise_Boundary(oms, $applicationName) {
-	System_Boundary(oms_boundary, "Order Management System") {
-		System_Boundary(om, "Order Management") {
+Enterprise_Boundary(oms, "$applicationName - Enterprise", $tags="enterprise_boundary") {
+	System_Boundary(oms_boundary, "Order Management System", "", $tags="system_boundary") {
+		System_Boundary(om, "Order Management", "", $tags="sub_system_boundary") {
 			Container(om_api, "Api", "API")
 			Container(om_cc, "Commission Calculator", "Calculates calculate based on the last exchange rules.")
 			Container(om_cm, "Customer Management", "Manage customer and customer trading code information")
@@ -42,7 +45,7 @@ Enterprise_Boundary(oms, $applicationName) {
 			Rel(om_rabbit, om_api, "Subscribe")
 		}
 
-		System_Boundary(md, "Market Data") {
+		System_Boundary(md, "Market Data", $tags="sub_system_boundary") {
 			Container(data_provider, "Data Provider", "Receive data from hubs and publish on a queue")
 			Container(rabbitmq, "Message Bus", "RabbitMq", "", $tags="events")
 			Container(data_distributer, "Data Distributer", ".NET7 Web Api", "Distribute data among market data service(s)")
@@ -64,7 +67,7 @@ Enterprise_Boundary(oms, $applicationName) {
 			Rel(kucoin, data_provider, "Public data")
 		}
 
-		System_Boundary(gw, "OMS Gateway") {
+		System_Boundary(gw, "OMS Gateway", $tags="sub_system_boundary") {
 			Container(oms_gw, "Gateway", ".NET6 Web Api", "Internal gateway which supply the internal systems")
 			Rel(md_api, oms_gw, "")
 			BiRel(om_api, oms_gw, "")
@@ -73,7 +76,7 @@ Enterprise_Boundary(oms, $applicationName) {
 		}
 	}
 
-	System_Boundary(ot_boundary, "Online Trading") {
+	System_Boundary(ot_boundary, "Online Trading", $tags="system_boundary") {
 		Container(ot, "Online Trading", "Allows customers to make trades and view reports about trades.")
 		Container(ot_wl, "Watchlist", "Customer watchlist management system")
 		ContainerDb(ot_wl_db, "WL Database", "MSSQL")
